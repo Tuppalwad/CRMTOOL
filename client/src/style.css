@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+body {
+  font-family: "League Spartan";
+}
+
+.inPhonemode {
+  display: block;
+}
+
+.hometitle {
+  font-size: 50px;
+  font-weight: 700;
+  margin-top: 100px;
+  margin-bottom: 50px;
+  margin-left: 50px;
+  padding-left: 10px;
+}
+
+.leftdiv {
+  width: 50%;
+  justify-items: center;
+  margin-left: 50px;
+}
+
+.smalltext {
+  width: 50%;
+  font-size: 20px;
+  margin-left: 0px;
+  padding-left: 10px;
+  margin-left: 50px;
+}
+.smalltext2 {
+  width: 50%;
+  font-size: 20px;
+  margin-left: 100px;
+  margin-top: 20px;
+  padding-left: 10px;
+}
+.getstartbtn {
+  margin-left: 60px;
+  padding-left: 10px;
+}
+
+.imgright {
+  margin-left: -50px;
+}
+.rightbox {
+  width: 50%;
+}
+
+@media screen and (min-width: 300px) {
+  .inPhonemode {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .navbarhight {
+    height: 80px !important;
+  }
+  .rightbox {
+    margin-top: 0px;
+    width: 100%;
+  }
+  .leftdiv {
+    margin-left: 0px;
+    padding: 0px 10px 0px 10px;
+    width: 100%;
+  }
+  .hometitle {
+    font-size: 50px;
+    margin-top: 100px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding-left: 0px;
+    width: 100%;
+  }
+  .smalltext {
+    font-size: 15px;
+    margin-left: 20px;
+    padding-left: 0px;
+    width: 100%;
+  }
+  .getstartbtn {
+    margin-left: 20px;
+    padding-left: 0px;
+  }
+
+  .imgright {
+    margin-left: 0px;
+    width: 100%;
+  }
+  .infotext {
+    padding: 17px;
+  }
+}
+
+/* #Dnavabar logout btn  */
