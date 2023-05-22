@@ -6,7 +6,7 @@ function Navbar() {
   let Links = [
     { name: "Solutions", link: "/" },
 
-    { name: "Features", link: "/" },
+    { name: "Feedback Form", link: "/feedback" },
 
     { name: "Contact", link: "/contact" },
   ];
@@ -70,7 +70,7 @@ function Navbar() {
               Sign in
             </Link>
           </button>
-          <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-4 border border-blue-500 hover:border-transparent rounded">
+          <button class="bg-transparent inPhonemode hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-4 border border-blue-500 hover:border-transparent rounded">
             <Link to="/register">Sign Up</Link>
           </button>
           {/* <button

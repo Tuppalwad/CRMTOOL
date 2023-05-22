@@ -8,16 +8,24 @@ function CreateContactLIst() {
   const [rows, setrows] = React.useState([]);
   const [email, setemail] = React.useState("");
   const [filename, setfilename] = React.useState("");
+  const [test, settest] = React.useState([]);
   const navigate = useNavigate();
   const readExcel = (e) => {
     e.preventDefault();
     const file = e.target.files[0];
+    const testd = e.target.files[1];
     readXlsxFile(file).then((rows) => {
       setrows(rows);
     });
+
+    readXlsxFile(testd).then((s) => {
+      settest(s);
+    });
   };
+
   console.log("testeste");
-  console.log(rows, email);
+  console.log(rows);
+  console.log(test);
   useEffect(() => {
     account
       .get()
@@ -47,12 +55,18 @@ function CreateContactLIst() {
       .then((res) => {
         console.log(res.code);
         if (res.code === "Success") {
-          swal("Contact List", "Contact List Successfully", "success");
-          window.location.href = "/profile";
+          swal("Contact List", "Contact List Successfully", "success").then(
+            () => {
+              window.location.href = "/list";
+            }
+          );
         } else {
-          swal("Contact List", "Contact List Failed", "error");
+          swal("Contact List", "Contact List Failed", "error").then(() => {
+            window.location.href = "/list";
+          });
         }
       });
+    e.target.reset();
   };
 
   return (
@@ -69,7 +83,7 @@ function CreateContactLIst() {
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-dark-100"
                 for="multiple_files"
               >
-                File Name
+                Contact List Name
               </label>
               <input
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -96,7 +110,7 @@ function CreateContactLIst() {
               />
             </div>
             <button class="bg-blue-500 my-3 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Button
+              Create Contact List
             </button>
           </form>
         </div>

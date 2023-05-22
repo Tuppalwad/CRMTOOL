@@ -1,21 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import DNavbar from "./DNavbar";
-import swal from "sweetalert";
+import { FaCamera } from "react-icons/fa";
 import Context from "../Context/Createcontext";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const navigate = useNavigate();
-  const { email, name, phone, smtp, contactlist } = useContext(Context);
-  console.log(
-    smtp.host,
-    smtp.username,
-    smtp.password,
-    smtp.port,
-    contactlist.length
-  );
+  const { email, name, smtp, contactlist } = useContext(Context);
+  const [image, setImage] = useState(null);
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setImage(reader.result);
+      }
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
   if (smtp.host === undefined) {
     return (
       <>
@@ -56,11 +64,38 @@ function Profile() {
             />
           </div>
           <div className="mx-auto w-32 h-32 relative mb-3 -mt-16 border-4 border-white rounded-full overflow-hidden">
-            <img
-              className="object-cover object-center h-32"
-              src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ"
-              alt="Woman looking front"
-            />
+            {image ? (
+              <img
+                src={image}
+                className="object-cover object-center h-32"
+                alt="Profile"
+              />
+            ) : (
+              <div className=" justify-center items-center  relative mt-12 ml-12">
+                <label htmlFor="image-upload">
+                  <FaCamera size={30} />
+                </label>
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* add edit button icon here  */}
+          <div className="flex justify-center items-center">
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+              onClick={() => {
+                navigate("/editprofile");
+              }}
+            >
+              Edit Profile
+            </button>
           </div>
 
           <div className="border-t border-gray-200">
@@ -103,14 +138,6 @@ function Profile() {
                 <dt className="text-sm font-medium text-gray-500">Password</dt>
                 <dt className="text-sm font-medium text-gray-900">
                   {smtp.password}
-                </dt>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">
-                  Phone Number
-                </dt>
-                <dt className="text-sm font-medium text-gray-900">
-                  {phone ? phone : "Not set"}
                 </dt>
               </div>
             </dl>
@@ -160,13 +187,38 @@ function Profile() {
               />
             </div>
             <div className="mx-auto w-32 h-32 relative mb-3 -mt-16 border-4 border-white rounded-full overflow-hidden">
-              <img
-                className="object-cover object-center h-32"
-                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ"
-                alt="Woman looking front"
-              />
+              {image ? (
+                <img
+                  src={image}
+                  className="object-cover object-center h-32"
+                  alt="Profile"
+                />
+              ) : (
+                <div className=" justify-center items-center  relative mt-12 ml-12">
+                  <label htmlFor="image-upload">
+                    <FaCamera size={30} />
+                  </label>
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              )}
             </div>
 
+            <div className="flex justify-center items-center">
+              <button
+                className="bg-blue-500 mb-3 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                onClick={() => {
+                  navigate("/editprofile");
+                }}
+              >
+                Edit Profile
+              </button>
+            </div>
             <div className="border-t border-gray-200">
               <dl>
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -215,14 +267,6 @@ function Profile() {
                     {smtp.password}
                   </dt>
                 </div>
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Phone Number
-                  </dt>
-                  <dt className="text-sm font-medium text-gray-900">
-                    {phone ? phone : "Not set"}
-                  </dt>
-                </div>
               </dl>
             </div>
           </div>
@@ -243,12 +287,39 @@ function Profile() {
               alt="Mountain"
             />
           </div>
+
           <div className="mx-auto w-32 h-32 relative mb-3 -mt-16 border-4 border-white rounded-full overflow-hidden">
-            <img
-              className="object-cover object-center h-32"
-              src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ"
-              alt="Woman looking front"
-            />
+            {image ? (
+              <img
+                src={image}
+                className="object-cover object-center h-32"
+                alt="Profile"
+              />
+            ) : (
+              <div className=" justify-center items-center  relative mt-12 ml-12">
+                <label htmlFor="image-upload">
+                  <FaCamera size={30} />
+                </label>
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-center items-center">
+            <button
+              className="bg-blue-500 mb-3 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+              onClick={() => {
+                navigate("/editprofile");
+              }}
+            >
+              Edit Profile
+            </button>
           </div>
 
           <div className="border-t border-gray-200">
@@ -291,14 +362,6 @@ function Profile() {
                 <dt className="text-sm font-medium text-gray-500">Password</dt>
                 <dt className="text-sm font-medium text-gray-900">
                   {smtp.password}
-                </dt>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">
-                  Phone Number
-                </dt>
-                <dt className="text-sm font-medium text-gray-900">
-                  {phone ? phone : "Not set"}
                 </dt>
               </div>
             </dl>

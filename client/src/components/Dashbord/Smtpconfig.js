@@ -47,10 +47,15 @@ function Smtpconfig() {
             "SMTP Configuration",
             "SMTP Configuration Successfully",
             "success"
-          );
-          window.location.href = "/profile";
+          ).then(() => {
+            window.location.href = "/smtp";
+          });
         } else {
-          swal("SMTP Configuration", "SMTP Configuration Failed", "error");
+          swal("SMTP Configuration", "SMTP Configuration Failed", "error").then(
+            () => {
+              window.location.href = "/smtp";
+            }
+          );
         }
       });
   };
