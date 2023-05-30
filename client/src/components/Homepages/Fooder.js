@@ -8,7 +8,7 @@ function Fooder() {
           <div className="md:flex md:justify-between">
             <div
               className=" font-bold text-2xl cursor-pointer flex items-center font-[Poppins] 
-      text-gray-800 "
+           text-gray-800 "
             >
               <span className="text-3xl text-indigo-600 mr-1 pt-2">
                 <ion-icon name="logo-ionic"></ion-icon>
@@ -17,7 +17,7 @@ function Fooder() {
               <span className="text-2xl text-white">Tool</span>
             </div>
 
-            <div className="grid grid-cols-2 justify-center items-start w-1/3 mx-auto gap-8 sm:gap-6 sm:grid-cols-3">
+            {/* <div className="grid grid-cols-2 justify-center items-start w-1/3 mx-auto gap-8 sm:gap-6 sm:grid-cols-3">
               <div>
                 <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
                   Unsubscribe link
@@ -62,7 +62,7 @@ function Fooder() {
                   </li>
                 </ul>
               </div>
-            </div>
+            </div> */}
           </div>
           <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
           <div className="sm:flex sm:items-center sm:justify-between">

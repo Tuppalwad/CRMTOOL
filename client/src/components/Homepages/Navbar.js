@@ -6,8 +6,6 @@ function Navbar() {
   let Links = [
     { name: "Solutions", link: "/" },
 
-    { name: "Feedback Form", link: "/feedback" },
-
     { name: "Contact", link: "/contact" },
   ];
   let [open, setOpen] = useState(false);

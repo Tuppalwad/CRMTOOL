@@ -7,23 +7,44 @@ import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const navigate = useNavigate();
-  const { email, name, smtp, contactlist } = useContext(Context);
-  const [image, setImage] = useState(null);
+  const { email, name, smtp, contactlist, userImage } = useContext(Context);
+  const [binaryimg, setBinaryimg] = useState(null);
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setImage(reader.result);
-      }
-    };
-
-    if (file) {
-      reader.readAsDataURL(file);
-    }
+  const imageupload = async (e) => {
+    const file = e.target.files[0];
+    const base64 = await convertTobase64(file);
+    console.log(base64);
+    setBinaryimg(base64);
+    fetch("http://localhost:5000/uploadImage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Allow-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ email: email, image: base64 }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res);
+        if (res.status === "success") {
+          window.location.reload();
+        }
+      });
   };
+  function convertTobase64(file) {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+  console.log(userImage);
+
   if (smtp.host === undefined) {
     return (
       <>
@@ -64,9 +85,9 @@ function Profile() {
             />
           </div>
           <div className="mx-auto w-32 h-32 relative mb-3 -mt-16 border-4 border-white rounded-full overflow-hidden">
-            {image ? (
+            {userImage ? (
               <img
-                src={image}
+                src={userImage}
                 className="object-cover object-center h-32"
                 alt="Profile"
               />
@@ -79,7 +100,7 @@ function Profile() {
                   type="file"
                   id="image-upload"
                   accept="image/*"
-                  onChange={handleImageUpload}
+                  onChange={imageupload}
                   className="hidden"
                 />
               </div>
@@ -187,9 +208,9 @@ function Profile() {
               />
             </div>
             <div className="mx-auto w-32 h-32 relative mb-3 -mt-16 border-4 border-white rounded-full overflow-hidden">
-              {image ? (
+              {userImage ? (
                 <img
-                  src={image}
+                  src={userImage}
                   className="object-cover object-center h-32"
                   alt="Profile"
                 />
@@ -202,7 +223,7 @@ function Profile() {
                     type="file"
                     id="image-upload"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={imageupload}
                     className="hidden"
                   />
                 </div>
@@ -275,6 +296,7 @@ function Profile() {
       </>
     );
   }
+
   return (
     <>
       <div>
@@ -289,9 +311,9 @@ function Profile() {
           </div>
 
           <div className="mx-auto w-32 h-32 relative mb-3 -mt-16 border-4 border-white rounded-full overflow-hidden">
-            {image ? (
+            {userImage ? (
               <img
-                src={image}
+                src={userImage}
                 className="object-cover object-center h-32"
                 alt="Profile"
               />
@@ -304,7 +326,7 @@ function Profile() {
                   type="file"
                   id="image-upload"
                   accept="image/*"
-                  onChange={handleImageUpload}
+                  onChange={imageupload}
                   className="hidden"
                 />
               </div>

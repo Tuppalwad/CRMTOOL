@@ -4,7 +4,7 @@ import DNavbar from "../Dashbord/DNavbar";
 import Context from "../Context/Createcontext";
 import swal from "sweetalert";
 function Inbox() {
-  const { getspammails, email } = useContext(Context);
+  const { resultmails, email } = useContext(Context);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
@@ -35,7 +35,7 @@ function Inbox() {
           "Content-Type": "application/json",
           "Allow-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify({ id: id, email: email }),
+        body: JSON.stringify({ id: id, email: email, catagory: "result" }),
       })
         .then((res) => res.json())
         .then((res) => {
@@ -104,7 +104,7 @@ function Inbox() {
                         </td>
                       </tr>
                     ))
-                  : getspammails.map((email, index) => (
+                  : resultmails.map((email, index) => (
                       <tr key={index}>
                         <td className="px-2 py-2 sm:px-4">{email.subject}</td>
                         <td className="px-2 py-2 sm:px-4">{email.body}</td>
@@ -114,7 +114,7 @@ function Inbox() {
                         <td className="px-2 py-2 sm:px-4">
                           <button
                             onClick={() => {
-                              deleteemail(email._id);
+                              deleteemail(email.id);
                             }}
                             className="bg-green-500  -mr-12 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm sm:py-2 sm:px-4"
                           >

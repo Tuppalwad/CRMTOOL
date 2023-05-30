@@ -9,6 +9,9 @@ from SpamDetation import check_spam
 import smtplib
 import time
 import threading
+from flask import Flask, request, send_file
+from werkzeug.utils import secure_filename
+import os
 
 # from inbox import getMails
 import firebase_admin
@@ -39,6 +42,8 @@ CORS(app)
 # getting date and time
 date = datetime.now()
 date = date.strftime("%d-%m-%Y,%H:%M:%S")
+UPLOAD_FOLDER = "uploads"  # Folder to store uploaded images
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 @app.route("/feedback", methods=["POST"])
@@ -200,6 +205,7 @@ def getSmtpConfig():
         email = user[0]
         try:
             serverdata = ref.child("users").child(email).child("smtpConfig").get()
+
             if serverdata is None:
                 return jsonify(
                     {"data": {"host": "", "port": "", "username": "", "password": ""}}
@@ -323,6 +329,7 @@ def sendmail():
             port = int(data["port"])
             username = data["username"]
             password = data["password"]
+            spam = data["spam"]
             type = data["type"].split(" ")
             condition = data["condition"]
             body = BeautifulSoup(body, "html.parser")
@@ -330,14 +337,7 @@ def sendmail():
             countofmailsend = 0
             meargeClist = []
             allmails = []
-            topitem = (
-                ref.child("users")
-                .child(user)
-                .child("contactList")
-                .child(contact_list[0])
-                .get()[0]
-            )
-
+            print(contact_list)
             for i in contact_list:
                 for j in (
                     ref.child("users")
@@ -348,8 +348,9 @@ def sendmail():
                 ):
                     meargeClist.append(j)
                     allmails.append(j[1])
+            print(meargeClist)
 
-            contact_list = meargeClist
+            print("test")
             server = smtplib.SMTP(host, port)
             server.ehlo()
             server.starttls()
@@ -370,21 +371,42 @@ def sendmail():
                 msg.attach(part)
                 server.sendmail(username, singlemail, msg.as_string())
 
-                count = ref.child("users").child(user).child("inbox").get()
+                count = (
+                    ref.child("users")
+                    .child(user)
+                    .child("inbox")
+                    .child("singlemail")
+                    .get()
+                )
                 if count is None:
                     count = 0
                 else:
                     count = len(count)
 
-                ref.child("users").child(user).child("inbox").child(str(count)).set(
+                ref.child("users").child(user).child("inbox").child("singlemail").child(
+                    str(count)
+                ).set(
                     {
-                        "to": singlemail,
+                        "id": count,
+                        "clist": [singlemail],
                         "subject": subject,
                         "body": body,
                         "date": date,
                         "type": type[1],
                     }
                 )
+                if spam == "true":
+                    ref.child("users").child(user).child("spam").child(str(count)).set(
+                        {
+                            "id": count,
+                            "clist": [singlemail],
+                            "subject": subject,
+                            "body": body,
+                            "date": date,
+                            "type": type[1],
+                        }
+                    )
+
                 countofmailsend += 1
 
                 server.quit()
@@ -398,6 +420,16 @@ def sendmail():
                 )
             elif type[1] == "BCC":
                 list_of_emails = []
+                firstitem = contact_list[0]
+                contact_list = meargeClist
+
+                topitem = (
+                    ref.child("users")
+                    .child(user)
+                    .child("contactList")
+                    .child(firstitem)
+                    .get()[0]
+                )
                 for i in contact_list:
                     message = ""
                     for j in range(2, len(i)):
@@ -418,15 +450,22 @@ def sendmail():
                         msg.attach(part)
 
                         server.sendmail(username, i[1], msg.as_string())
-                        count = ref.child("users").child(user).child("inbox").get()
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
                         if count is None:
                             count = 0
                         else:
                             count = len(count)
                         ref.child("users").child(user).child("inbox").child(
-                            str(count)
-                        ).set(
+                            "result"
+                        ).child(str(count)).set(
                             {
+                                "id": count,
                                 "subject": subject,
                                 "body": body,
                                 "date": date,
@@ -434,6 +473,19 @@ def sendmail():
                                 "clist": contact_list + [singlemail],
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
                         countofmailsend += 1
 
                     elif condition == "Above 50%" and i[-1] > 50:
@@ -450,15 +502,22 @@ def sendmail():
                         msg.attach(part)
 
                         server.sendmail(username, i[1], msg.as_string())
-                        count = ref.child("users").child(user).child("inbox").get()
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
                         if count is None:
                             count = 0
                         else:
                             count = len(count)
                         ref.child("users").child(user).child("inbox").child(
-                            str(count)
-                        ).set(
+                            "result"
+                        ).child(str(count)).set(
                             {
+                                "id": count,
                                 "subject": subject,
                                 "body": body,
                                 "date": date,
@@ -466,6 +525,19 @@ def sendmail():
                                 "clist": contact_list + [singlemail],
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
                         countofmailsend += 1
 
                     elif condition == "Not attempt" and i[-1] == 0:
@@ -483,15 +555,22 @@ def sendmail():
 
                         server.sendmail(username, i[1], msg.as_string())
 
-                        count = ref.child("users").child(user).child("inbox").get()
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
                         if count is None:
                             count = 0
                         else:
                             count = len(count)
                         ref.child("users").child(user).child("inbox").child(
-                            str(count)
-                        ).set(
+                            "result"
+                        ).child(str(count)).set(
                             {
+                                "id": count,
                                 "subject": subject,
                                 "body": body,
                                 "date": date,
@@ -499,6 +578,19 @@ def sendmail():
                                 "clist": contact_list + [singlemail],
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
                         countofmailsend += 1
 
                     elif condition == str(condition).isnumeric() and i[-1] < condition:
@@ -514,15 +606,22 @@ def sendmail():
                         part = MIMEText(html, "html")
                         msg.attach(part)
 
-                        count = ref.child("users").child(user).child("inbox").get()
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
                         if count is None:
                             count = 0
                         else:
                             count = len(count)
                         ref.child("users").child(user).child("inbox").child(
-                            str(count)
-                        ).set(
+                            "result"
+                        ).child(str(count)).set(
                             {
+                                "id": count,
                                 "subject": subject,
                                 "body": body,
                                 "date": date,
@@ -530,6 +629,19 @@ def sendmail():
                                 "clist": contact_list + [singlemail],
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
                         countofmailsend += 1
 
                     server.quit()
@@ -544,32 +656,53 @@ def sendmail():
 
             elif type[1] == "CC":
                 list_of_emails = []
+                firstitem = contact_list[0]
+                contact_list = meargeClist
+
+                topitem = (
+                    ref.child("users")
+                    .child(user)
+                    .child("contactList")
+                    .child(firstitem)
+                    .get()[0]
+                )
                 for i in contact_list:
                     message = ""
-                    countofmailsend = 0
                     for j in range(2, len(i)):
                         list_of_emails.append(i[1])
                         message += topitem[j] + ":" + str(i[j])
                         message += "\n"
+                    list_of_emails = list(set(list_of_emails))
+                    if condition == "Below 50%" and i[-1] < 50:
+                        html = (
+                            """\
+                        """
+                            + body
+                            + message
+                            + """
+                        """
+                        )
 
-                    html = (
-                        """\
-                    """
-                        + body
-                        + message
-                        + """
-                    """
-                    )
-                    part = MIMEText(html, "html")
-                    msg.attach(part)
-                    msg["To"] = singlemail
-                    msg["Cc"] = ",".join(allmails)
-
-                    if server.sendmail(username, i[1], msg.as_string()):
-                        # server.sendmail(username, i[1], msg.as_string())
-                        count = len(ref.child("users").child(user).child("inbox").get())
-                        ref.child("users").child(user).child("inbox").child(count).set(
+                        part = MIMEText(html, "html")
+                        msg.attach(part)
+                        msg["cc"] = " ".join(list_of_emails)
+                        server.sendmail(username, i[1], msg.as_string())
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "result"
+                        ).child(str(count)).set(
                             {
+                                "id": count,
                                 "subject": subject,
                                 "body": body,
                                 "date": date,
@@ -577,18 +710,187 @@ def sendmail():
                                 "clist": contact_list + [singlemail],
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
                         countofmailsend += 1
-                    else:
-                        continue
-                server.quit()
-                return jsonify(
-                    {
-                        "status": True,
-                        "message": "Mail sent successfully",
-                        "code": "Success",
-                        "count": countofmailsend,
-                    }
-                )
+
+                    elif condition == "Above 50%" and i[-1] > 50:
+                        html = (
+                            """\
+                        """
+                            + body
+                            + message
+                            + """
+                        """
+                        )
+
+                        part = MIMEText(html, "html")
+                        msg.attach(part)
+                        msg["cc"] = " ".join(list_of_emails)
+                        server.sendmail(username, i[1], msg.as_string())
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "result"
+                        ).child(str(count)).set(
+                            {
+                                "id": count,
+                                "subject": subject,
+                                "body": body,
+                                "date": date,
+                                "type": type[1],
+                                "clist": contact_list + [singlemail],
+                            }
+                        )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
+                        countofmailsend += 1
+
+                    elif condition == "Not attempt" and i[-1] == 0:
+                        html = (
+                            """\
+                        """
+                            + body
+                            + message
+                            + """
+                        """
+                        )
+
+                        part = MIMEText(html, "html")
+                        msg.attach(part)
+                        msg["cc"] = " ".join(list_of_emails)
+                        server.sendmail(username, i[1], msg.as_string())
+
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "result"
+                        ).child(str(count)).set(
+                            {
+                                "id": count,
+                                "subject": subject,
+                                "body": body,
+                                "date": date,
+                                "type": type[1],
+                                "clist": contact_list + [singlemail],
+                            }
+                        )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
+                        countofmailsend += 1
+
+                    elif condition == str(condition).isnumeric() and i[-1] < condition:
+                        html = (
+                            """\
+                        """
+                            + body
+                            + message
+                            + """
+                        """
+                        )
+
+                        part = MIMEText(html, "html")
+                        msg.attach(part)
+                        msg["cc"] = " ".join(list_of_emails)
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("result")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "result"
+                        ).child(str(count)).set(
+                            {
+                                "id": count,
+                                "subject": subject,
+                                "body": body,
+                                "date": date,
+                                "type": type[1],
+                                "clist": contact_list + [singlemail],
+                            }
+                        )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "clist": [singlemail],
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "type": type[1],
+                                }
+                            )
+                        countofmailsend += 1
+
+                    server.quit()
+                    return jsonify(
+                        {
+                            "status": True,
+                            "message": "Mail sent successfully",
+                            "code": "Success",
+                            "count": str(countofmailsend),
+                        }
+                    )
+
             else:
                 return jsonify(
                     {
@@ -757,20 +1059,29 @@ def sendBirthdayMail():
             )
 
 
-# send mail less attendenc stuendt to parents
-@app.route("/sendlessattendencemail", methods=["POST"])
-def sendlessattendencemail():
+# send attenedence mail
+@app.route("/sendattendencemail", methods=["POST"])
+def sendattendencemail():
     if request.method == "POST":
         try:
             data = request.get_json()
             user = data["email"].split("@")[0]
             subject = data["subject"]
             body = data["message"]
+            host = data["host"]
+            port = int(data["port"])
+            username = data["username"]
+            password = data["password"]
+            spam = data["spam"]
+
             contact_list = data["file"]
             condition = data["condition"]
             body = BeautifulSoup(body, "html.parser")
             body = body.get_text()
-            meargeClist = (
+            print(
+                host, port, username, password, subject, condition, contact_list, spam
+            )
+            listofdata = (
                 ref.child("users")
                 .child(user)
                 .child("contactList")
@@ -778,21 +1089,17 @@ def sendlessattendencemail():
                 .get()[1:-1]
             )
 
+            server = smtplib.SMTP(host, port)
+            server.ehlo()
+            server.starttls()
+            server.login(username, password)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = "<{}>".format(username)
+
             if condition == "Below 40%":
-                for i in meargeClist:
+                for i in listofdata:
                     if i[-1] < 40:
-                        data = ref.child("users").child(user).child("smtpConfig").get()
-                        host = data["host"]
-                        port = data["port"]
-                        username = data["username"]
-                        password = data["password"]
-                        server = smtplib.SMTP(host, port)
-                        server.ehlo()
-                        server.starttls()
-                        server.login(username, password)
-                        msg = MIMEMultipart("alternative")
-                        msg["Subject"] = subject
-                        msg["From"] = "<{}>".format(username)
                         html = (
                             """\
                             """
@@ -803,30 +1110,54 @@ def sendlessattendencemail():
                         part = MIMEText(html, "html")
                         msg.attach(part)
                         server.sendmail(username, i[1], msg.as_string())
-                        server.quit()
-                        return jsonify(
+                        print("mails send")
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("attendance")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "attendance"
+                        ).child(str(count)).set(
                             {
-                                "status": True,
-                                "message": "Mail sent successfully",
-                                "code": "Success",
+                                "id": count,
+                                "subject": subject,
+                                "body": body,
+                                "date": date,
+                                "clist": contact_list,
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "clist": contact_list,
+                                }
+                            )
+                server.quit()
 
+                return jsonify(
+                    {
+                        "status": True,
+                        "message": "Mail sent successfully",
+                        "code": "Success",
+                        "list": listofdata,
+                    }
+                )
             elif condition == "Below 50%":
-                for i in meargeClist:
-                    if i[-1] < 50:
-                        data = ref.child("users").child(user).child("smtpConfig").get()
-                        host = data["host"]
-                        port = data["port"]
-                        username = data["username"]
-                        password = data["password"]
-                        server = smtplib.SMTP(host, port)
-                        server.ehlo()
-                        server.starttls()
-                        server.login(username, password)
-                        msg = MIMEMultipart("alternative")
-                        msg["Subject"] = subject
-                        msg["From"] = "<{}>".format(username)
+                for i in listofdata:
+                    if i[-1] < 40:
                         html = (
                             """\
                             """
@@ -837,30 +1168,54 @@ def sendlessattendencemail():
                         part = MIMEText(html, "html")
                         msg.attach(part)
                         server.sendmail(username, i[1], msg.as_string())
-                        server.quit()
-                        return jsonify(
+                        print("mails send")
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("attendance")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "attendance"
+                        ).child(str(count)).set(
                             {
-                                "status": True,
-                                "message": "Mail sent successfully",
-                                "code": "Success",
+                                "id": count,
+                                "subject": subject,
+                                "body": body,
+                                "date": date,
+                                "clist": contact_list,
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "clist": contact_list,
+                                }
+                            )
+                server.quit()
 
+                return jsonify(
+                    {
+                        "status": True,
+                        "message": "Mail sent successfully",
+                        "code": "Success",
+                        "list": listofdata,
+                    }
+                )
             elif condition == "Below 60%":
-                for i in meargeClist:
-                    if i[-1] < 60:
-                        data = ref.child("users").child(user).child("smtpConfig").get()
-                        host = data["host"]
-                        port = data["port"]
-                        username = data["username"]
-                        password = data["password"]
-                        server = smtplib.SMTP(host, port)
-                        server.ehlo()
-                        server.starttls()
-                        server.login(username, password)
-                        msg = MIMEMultipart("alternative")
-                        msg["Subject"] = subject
-                        msg["From"] = "<{}>".format(username)
+                for i in listofdata:
+                    if i[-1] < 40:
                         html = (
                             """\
                             """
@@ -871,20 +1226,145 @@ def sendlessattendencemail():
                         part = MIMEText(html, "html")
                         msg.attach(part)
                         server.sendmail(username, i[1], msg.as_string())
-                        server.quit()
-                        return jsonify(
+                        print("mails send")
+                        count = (
+                            ref.child("users")
+                            .child(user)
+                            .child("inbox")
+                            .child("attendance")
+                            .get()
+                        )
+                        if count is None:
+                            count = 0
+                        else:
+                            count = len(count)
+                        ref.child("users").child(user).child("inbox").child(
+                            "attendance"
+                        ).child(str(count)).set(
                             {
-                                "status": True,
-                                "message": "Mail sent successfully",
-                                "code": "Success",
+                                "id": count,
+                                "subject": subject,
+                                "body": body,
+                                "date": date,
+                                "clist": contact_list,
                             }
                         )
+                        if spam == "true":
+                            ref.child("users").child(user).child("spam").child(
+                                str(count)
+                            ).set(
+                                {
+                                    "id": count,
+                                    "subject": subject,
+                                    "body": body,
+                                    "date": date,
+                                    "clist": contact_list,
+                                }
+                            )
+                server.quit()
+
+                return jsonify(
+                    {
+                        "status": True,
+                        "message": "Mail sent successfully",
+                        "code": "Success",
+                        "list": listofdata,
+                    }
+                )
+
         except Exception as e:
             print(e)
             return jsonify(
                 {
                     "status": False,
-                    "message": "Error while sending mail",
+                    "message": "Error while sending attendence mail : {}".format(e),
+                    "code": "Error",
+                }
+            )
+
+
+# send single mail
+
+
+@app.route("/sendsinglmail", methods=["POST"])
+def sendsingle():
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            user = data["email"].split("@")[0]
+            subject = data["subject"]
+            body = data["message"]
+            host = data["host"]
+            port = int(data["port"])
+            username = data["username"]
+            password = data["password"]
+            spam = data["spam"]
+            singlemail = data["to"]
+            body = BeautifulSoup(body, "html.parser")
+            body = body.get_text()
+            print(host, port, username, password, subject, singlemail, spam)
+            server = smtplib.SMTP(host, port)
+            server.ehlo()
+            server.starttls()
+            server.login(username, password)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = "<{}>".format(username)
+            html = (
+                """\
+                        """
+                + body
+                + """
+                        """
+            )
+            part = MIMEText(html, "html")
+            msg.attach(part)
+            server.sendmail(username, singlemail, msg.as_string())
+            print("mails send")
+            count = (
+                ref.child("users").child(user).child("inbox").child("singlemail").get()
+            )
+            if count is None:
+                count = 0
+            else:
+                count = len(count)
+            ref.child("users").child(user).child("inbox").child("singlemail").child(
+                str(count)
+            ).set(
+                {
+                    "id": count,
+                    "subject": subject,
+                    "body": body,
+                    "date": date,
+                    "clist": "singlemail",
+                }
+            )
+
+            if spam == "true":
+                ref.child("users").child(user).child("spam").child(str(count)).set(
+                    {
+                        "id": count,
+                        "subject": subject,
+                        "body": body,
+                        "date": date,
+                        "clist": "singlemail",
+                    }
+                )
+            server.quit()
+
+            return jsonify(
+                {
+                    "status": True,
+                    "message": "Mail sent successfully",
+                    "code": "Success",
+                }
+            )
+        except Exception as e:
+            print(e)
+            return jsonify(
+                {
+                    "status": False,
+                    "message": "Error while sending single mail : {}".format(e),
                     "code": "Error",
                 }
             )
@@ -898,8 +1378,103 @@ def getallmails():
     if request.method == "POST":
         data = request.get_json()
         user = data["email"].split("@")[0]
-        emails = ref.child("users").child(user).child("inbox").get()
-        return jsonify({"status": True, "email": emails})
+        emails = ref.child("users").child(user).child("inbox").child("attendance").get()
+        resultemail = (
+            ref.child("users").child(user).child("inbox").child("result").get()
+        )
+        singlemails = (
+            ref.child("users").child(user).child("inbox").child("singlemail").get()
+        )
+        newlist = []
+        if emails is None:
+            emails = []
+        if resultemail is None:
+            resultemail = []
+        if singlemails is None:
+            singlemails = []
+
+        for i in emails:
+            if i != None:
+                newlist.append(i)
+        for i in resultemail:
+            if i != None:
+                newlist.append(i)
+        for i in singlemails:
+            if i != None:
+                newlist.append(i)
+
+        return jsonify({"status": True, "email": newlist})
+    else:
+        return jsonify(
+            {
+                "Error": "something went wrong",
+            }
+        )
+
+
+# get attendence mails data
+@app.route("/getattendencemails", methods=["POST"])
+def getattendencemails():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        emails = ref.child("users").child(user).child("inbox").child("attendance").get()
+        newlist = []
+        if emails is None:
+            emails = []
+
+        for i in emails:
+            if i != None:
+                newlist.append(i)
+        return jsonify({"status": "Success", "email": newlist})
+    else:
+        return jsonify(
+            {
+                "Error": "something went wrong",
+            }
+        )
+
+
+# get result mails data
+@app.route("/getresultemails", methods=["POST"])
+def getresultemails():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        resultemail = (
+            ref.child("users").child(user).child("inbox").child("result").get()
+        )
+        if resultemail is None:
+            resultemail = []
+        newlist = []
+        for i in resultemail:
+            if i != None:
+                newlist.append(i)
+        return jsonify({"status": "Success", "email": newlist})
+    else:
+        return jsonify(
+            {
+                "Error": "something went wrong",
+            }
+        )
+
+
+# get spam mails
+@app.route("/getspamemails", methods=["POST"])
+def getspamemails():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        spamemail = ref.child("users").child(user).child("spam").get()
+        print(spamemail)
+        newlist = []
+        if spamemail is None:
+            spamemail = []
+        for i in spamemail:
+            if i != None:
+                newlist.append(i)
+
+        return jsonify({"status": "Success", "email": newlist})
     else:
         return jsonify(
             {
@@ -909,36 +1484,117 @@ def getallmails():
 
 
 @app.route("/serchemails", methods=["POST"])
-def serchmails():
+def serchemails():
     if request.method == "POST":
         data = request.get_json()
-
-        text = data["text"]
         user = data["email"].split("@")[0]
-        print(text, user)
-        email = ref.child("users").child(user).child("inbox").get()
-        filtered_data = list(filter(lambda d: d["subject"] == text, email))
-        return jsonify({"email": filtered_data})
+        text = data["text"]
+        emails = ref.child("users").child(user).child("inbox").child("attendance").get()
+        resultemail = (
+            ref.child("users").child(user).child("inbox").child("result").get()
+        )
+        newlist = []
+        for i in emails:
+            if i != None:
+                if text in i["subject"]:
+                    newlist.append(i)
+        for i in resultemail:
+            if i != None:
+                if text in i["subject"]:
+                    newlist.append(i)
+
+        return jsonify({"status": True, "email": newlist})
+
     else:
-        return jsonify({"error": "something wrong"})
+        return jsonify(
+            {
+                "Error": "something went wrong",
+            }
+        )
 
 
-# # serch emails
-# @app.route("/serchemails", methods="POST")
-# def findMails():
-#     if request.method == "POST":
-#         data = request.get_json()
-#         text = data["text"]
-#         user = data["email"].split("@")[0]
-#         emails = ref.child("users").child(user).child("inbox").get()
-#         filtered_data = list(filter(lambda d: d["subject"] == text, emails))
-#         return jsonify({"data": filtered_data})
-#     else:
-#         return jsonify({"error": "some thing went wrong"})
+# delete mails by using id
+@app.route("/deleteusermail", methods=["POST"])
+def deleteMail():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        id = data["id"]
+        listname = data["catagory"]
+        print(id)
+        ref.child("users").child(user).child("inbox").child(listname).child(
+            str(id)
+        ).delete()
+        return jsonify({"status": "success"})
+
+
+@app.route("/uploadImage", methods=["POST"])
+def uploadImage():
+    if request.method == "POST":
+        data = request.get_json()
+        image = data["image"]
+        user = data["email"].split("@")[0]
+        # print(image)
+        ref.child("users").child(user).child("images").set(image)
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "failed"})
+
+
+@app.route("/getImages", methods=["POST"])
+def getImages():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        images = ref.child("users").child(user).child("images").get()
+        # print(images)
+        # print("test")
+        return jsonify({"status": "success", "images": images})
+    else:
+        return jsonify({"status": "failed"})
+
+
+@app.route("/updateimage", methods=["POST"])
+def updateimage():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        image = data["image"]
+        ref.child("users").child(user).child("images").update(image)
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "failed"})
+
+
+@app.route("/updateprofile", methods=["POST"])
+def updateprofile():
+    if request.method == "POST":
+        data = request.get_json()
+        user = data["email"].split("@")[0]
+        host = data["host"]
+        port = data["port"]
+        username = data["username"]
+        password = data["password"]
+        image = data["image"]
+        ref.child("users").child(user).child("smtpConfig").update(
+            {
+                "host": host,
+                "port": port,
+                "username": username,
+                "password": password,
+            }
+        )
+        ref.child("users").child(user).child("images").update({"image": image})
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "failed"})
 
 
 if __name__ == "__main__":
-    # ref.child("users").child("vtuppalwad").child("contactList").delete()
+    # ref.child("users").child("omkar").child("contactList").child("Friends").delete()
+    # ref.child("users").child("omkar").child("contactList").child(
+    #     "BirthdayList"
+    # ).delete()
     # sendBirthdayMail()
 
     app.run(debug=True)

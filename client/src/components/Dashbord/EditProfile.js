@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import Dnavbar from "./DNavbar";
-import { useNavigate } from "react-router-dom";
 import swal from "sweetalert";
-import account from "../Appwrite/appwriteConfig";
 import Context from "../Context/Createcontext";
 function EditProfile() {
   const { email, name, smtp } = React.useContext(Context);
@@ -10,11 +8,7 @@ function EditProfile() {
   const [port, setPort] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [fname, setFname] = useState("");
-
-  const navigate = useNavigate();
-  const [newemail, setemail] = useState("");
-  const [photo, setphoto] = useState("");
+  const [binaryimg, setBinaryimg] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,9 +18,10 @@ function EditProfile() {
       username: username,
       password: password,
       email: email,
+      image: binaryimg,
     };
 
-    fetch("http://localhost:5000/smtpConfig", {
+    fetch("http://localhost:5000/updateprofile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +33,7 @@ function EditProfile() {
 
       .then((res) => {
         console.log(res.code);
-        if (res.code === "Success") {
+        if (res.status === "success") {
           swal(
             "SMTP Configuration",
             "SMTP Configuration Successfully",
@@ -55,7 +50,24 @@ function EditProfile() {
         }
       });
   };
-
+  const imageupload = async (e) => {
+    const file = e.target.files[0];
+    const base64 = await convertTobase64(file);
+    console.log(base64);
+    setBinaryimg(base64);
+  };
+  function convertTobase64(file) {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
   return (
     <>
       <Dnavbar></Dnavbar>
@@ -77,6 +89,7 @@ function EditProfile() {
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   id="grid-password"
                   type="file"
+                  onChange={imageupload}
                 />
               </div>
             </div>
@@ -94,9 +107,6 @@ function EditProfile() {
                   type="text"
                   placeholder="example : John Doe"
                   value={name}
-                  onChange={(e) => {
-                    setFname(e.target.value);
-                  }}
                 />
               </div>
             </div>
@@ -115,7 +125,7 @@ function EditProfile() {
                   type="email"
                   placeholder={email}
                   onChange={(e) => {
-                    setemail(e.target.value);
+                    setUsername(e.target.value);
                   }}
                 />
               </div>

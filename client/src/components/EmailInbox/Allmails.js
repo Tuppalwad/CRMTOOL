@@ -4,7 +4,7 @@ import DNavbar from "../Dashbord/DNavbar";
 import Context from "../Context/Createcontext";
 import swal from "sweetalert";
 function Inbox() {
-  const { getspammails, email } = useContext(Context);
+  const { listofmails, email } = useContext(Context);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
@@ -93,7 +93,9 @@ function Inbox() {
                   ? searchResults.map((email, index) => (
                       <tr className=" justify-center items-center" key={index}>
                         <td className="px-2 py-2 sm:px-4  ">{email.subject}</td>
-                        <td className="px-2 py-2 sm:px-4">{email.body}</td>
+                        <td className="px-2 py-2 sm:px-4 w-1/2">
+                          {email.body}
+                        </td>
                         <td className="px-2 py-2 sm:px-4">{email.date}</td>
                         <td className="px-2 py-2 sm:px-4">{email.type}</td>
 
@@ -104,7 +106,7 @@ function Inbox() {
                         </td>
                       </tr>
                     ))
-                  : getspammails.map((email, index) => (
+                  : listofmails.map((email, index) => (
                       <tr key={index}>
                         <td className="px-2 py-2 sm:px-4">{email.subject}</td>
                         <td className="px-2 py-2 sm:px-4">{email.body}</td>

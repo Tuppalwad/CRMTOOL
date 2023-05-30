@@ -11,7 +11,7 @@ function Attendence() {
   const [message, setMessage] = React.useState("");
   const [subject, setSubject] = React.useState("");
   const [file, setFile] = React.useState("");
-  const { contactlist } = useContext(Context);
+  const { contactlist, smtp } = useContext(Context);
   const { email } = useContext(Context);
   const [selectedOption, setSelectedOption] = React.useState("");
   const [customOption, setCustomOption] = React.useState("");
@@ -32,9 +32,13 @@ function Attendence() {
       subject: subject,
       message: message,
       file: file,
-      contactlist: contactlist,
       condition: selectedOption === "" ? customOption : selectedOption,
       email: email,
+      spam: "false",
+      host: smtp.host,
+      port: smtp.port,
+      username: smtp.username,
+      password: smtp.password,
     };
 
     fetch("http://localhost:5000/checkSpam", {
@@ -51,7 +55,7 @@ function Attendence() {
         console.log(res);
         if (res.status === 400) {
           try {
-            fetch("http://localhost:5000/sendlessattendencemail", {
+            fetch("http://localhost:5000/sendattendencemail", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -85,8 +89,9 @@ function Attendence() {
           }).then((confirmed) => {
             console.log(confirmed);
             if (confirmed) {
+              data.spam = "true";
               try {
-                fetch("http://localhost:5000/sendlessattendencemail", {
+                fetch("http://localhost:5000/sendattendencemail", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -168,23 +173,13 @@ function Attendence() {
                   </label>
                   <select
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    name="choose file"
-                    id="choose file"
                     onChange={(e) => setFile(e.target.value)}
                   >
+                    <option value="" selected>
+                      Choose file
+                    </option>
                     {contactlist.map((item) => {
-                      return (
-                        // selected
-                        <>
-                          {item[0] === "BirthdayList" ? (
-                            <option value="choose items" selected>
-                              Choose items
-                            </option>
-                          ) : (
-                            <option value={item[0]}> {item[0]} </option>
-                          )}
-                        </>
-                      );
+                      return <option value={item[0]}>{item[0]}</option>;
                     })}
                   </select>
                 </div>

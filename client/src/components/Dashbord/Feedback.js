@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Navbar from "./Navbar";
+import DNavbar from "./DNavbar";
 import swal from "sweetalert";
 function Feedback() {
   const [email, setEmail] = useState("");
@@ -33,7 +33,7 @@ function Feedback() {
 
   return (
     <div>
-      <Navbar></Navbar>
+      <DNavbar />
       <section class="bg-white  my-6">
         <div class="py-8 lg:py-16 px-4 mx-auto max-w-screen-md">
           <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-center text-black">

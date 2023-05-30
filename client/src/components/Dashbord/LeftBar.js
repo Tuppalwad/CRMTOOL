@@ -40,7 +40,7 @@ export default function LeftMenu() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-        {["Inbox", "Send email"].map((text, index) => (
+        {["All Mail"].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton
               component={Link}
@@ -56,19 +56,21 @@ export default function LeftMenu() {
       </List>
       <Divider />
       <List>
-        {["All mail", "Trash", "Spam"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={`/${text.toLowerCase().replace(" ", "-")}`}
-            >
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {["Attendance Mail", "Result Mail", "Trash", "Spam"].map(
+          (text, index) => (
+            <ListItem key={text} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={`/${text.toLowerCase().replace(" ", "-")}`}
+              >
+                <ListItemIcon>
+                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                </ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItemButton>
+            </ListItem>
+          )
+        )}
       </List>
     </Box>
   );

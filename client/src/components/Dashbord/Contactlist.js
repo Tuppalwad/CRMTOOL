@@ -78,10 +78,10 @@ function Contactlist() {
                       <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">
                         {item[0]}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-100">
                         {item[1]}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-100">
                         <button
                           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
                           onClick={() => {

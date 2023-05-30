@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import DNavbar from "../DNavbar";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -8,27 +8,11 @@ import { useContext } from "react";
 import Context from "../../Context/Createcontext";
 // import Swal from "sweetalert2";
 function ComposeBox() {
-  const [message, setMessage] = React.useState("");
-  const [to, setTo] = React.useState("");
-  const [subject, setSubject] = React.useState("");
-  const [file, setFile] = React.useState("");
-  const { contactlist } = useContext(Context);
-  const [date, setDate] = React.useState("");
-  const [type, setType] = React.useState("");
-  const { smtp, email } = useContext(Context);
-  const [selectedOption, setSelectedOption] = React.useState("");
-  const [customOption, setCustomOption] = React.useState("");
-
-  const handleSelectChange = (event) => {
-    setSelectedOption(event.target.value);
-    if (event.target.value === "custom") {
-      setCustomOption("");
-    }
-  };
-
-  const handleCustomChange = (event) => {
-    setCustomOption(event.target.value);
-  };
+  const [to, setTo] = useState("");
+  const [message, setMessage] = useState("");
+  const [subject, setSubject] = useState("");
+  const [type, setType] = useState("");
+  const { smtp, email, contactlist } = useContext(Context);
   console.log("smtp");
   console.log(type);
 
@@ -38,30 +22,18 @@ function ComposeBox() {
     setType(txt);
   }
 
-  function clickHandler3() {
-    txt = document.getElementById("btn3").innerText;
-    setType(txt);
-  }
-  function clickHandler2() {
-    txt = document.getElementById("btn2").innerText;
-    setType(txt);
-  }
   const handalsubmit = (e) => {
     e.preventDefault();
     const data = {
       to: to,
       subject: subject,
       message: message,
-      file: file,
-      contactlist: contactlist,
       host: smtp.host,
       port: smtp.port,
       username: smtp.username,
       password: smtp.password,
-      date: date,
-
-      spam: false,
       email: email,
+      spam: "false",
     };
 
     fetch("http://localhost:5000/checkSpam", {
@@ -78,7 +50,7 @@ function ComposeBox() {
         console.log(res);
         if (res.status === 400) {
           try {
-            fetch("http://localhost:5000/composemail", {
+            fetch("http://localhost:5000/sendsinglmail", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -112,9 +84,9 @@ function ComposeBox() {
           }).then((confirmed) => {
             console.log(confirmed);
             if (confirmed) {
-              data.spam = true;
+              data.spam = "true";
               try {
-                fetch("http://localhost:5000/composemail", {
+                fetch("http://localhost:5000/sendsinglmail", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -129,6 +101,7 @@ function ComposeBox() {
                     console.log(res);
                     if (res.code === "Success") {
                       swal("Compose", "Compose Successfully", "success");
+
                       e.target.reset();
                     } else {
                       swal("Compose", "Compose Failed", "error");
@@ -155,7 +128,7 @@ function ComposeBox() {
       <DNavbar></DNavbar>
       <div className="container justify-center items-center w-[65%] md:w-3/5 mx-auto my-16 bg-white shadow-lg p-6">
         <div>
-          <h1 className="text-2xl pt-2 text-center">Compose</h1>
+          <h1 className="text-2xl pt-2 text-center">Send Email to Students</h1>
         </div>
         <form
           onSubmit={handalsubmit}
@@ -207,107 +180,7 @@ function ComposeBox() {
                     </div>
                   </div>
                 </div>
-                <div className="sm:col-span-4">
-                  <label
-                    htmlFor="username"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Date and Time
-                  </label>
-                  <div className="mt-2">
-                    <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                      <input
-                        type="datetime-local"
-                        name=""
-                        id="username"
-                        autoComplete="email"
-                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1  text-gray-900 placeholder:text-gray-800 focus:ring-0 sm:text-sm sm:leading-6"
-                        placeholder=" Enter the subject "
-                        onChange={(e) =>
-                          e.target.value >= new Date()
-                            ? setDate(e.target.value)
-                            : alert("Please enter a valid date")
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="sm:col-span-4">
-                  <label htmlFor="choose file">
-                    Choose file of student Email{" "}
-                  </label>
-                  <select
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    name="choose file"
-                    id="choose file"
-                    onChange={(e) => setFile(e.target.value)}
-                  >
-                    {contactlist.map((item) => {
-                      return (
-                        // selected
-                        <>
-                          <option value="choose items" selected>
-                            Choose items
-                          </option>
-                          <option value={item}>{item}</option>
-                        </>
-                      );
-                    })}
-                  </select>
-                </div>
-                <div className="sm:col-span-4">
-                  <label htmlFor="customSelect">Choose Option:</label>
-                  <select
-                    id="customSelect"
-                    name="customSelect"
-                    value={selectedOption}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    onChange={handleSelectChange}
-                  >
-                    <option value="" selected>
-                      Choose festival
-                    </option>
-                    <option value="option1"> Below 50% </option>
-                    <option value="option2"> Not attempt </option>
-                    <option value="option3">Above 50 %</option>
-                    <option value="option4">Fell</option>
-                    <option value="custom">Custom</option>
-                  </select>
 
-                  {selectedOption === "custom" && (
-                    <div>
-                      <input
-                        type="number"
-                        className="block flex-1 border-0  text-white   bg-slate-400 py-1.5 pl-1  placeholder:text-gray-800 focus:ring-0 sm:text-sm sm:leading-6"
-                        id="customOption"
-                        name="customOption"
-                        value={customOption}
-                        onChange={handleCustomChange}
-                      />
-                    </div>
-                  )}
-                </div>
-                {/* <div className="sm:col-span-4">
-                  <label htmlFor="choose file">Choose category </label>
-                  <select
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    name="choose file"
-                    id="choose file"
-                    onChange={(e) => setFile(e.target.value)}
-                  >
-                    {contactlist.map((item) => {
-                      return (
-                        // selected
-                        <>
-                          <option value="choose items" selected>
-                            Choose items
-                          </option>
-                          <option value={item}>{item}</option>
-                        </>
-                      );
-                    })}
-                  </select>
-                </div> */}
                 <div className="sm:col-span-4">
                   <label
                     htmlFor="username"
@@ -344,24 +217,6 @@ function ComposeBox() {
               onClick={clickHandler1}
             >
               Send Message
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              id="btn2"
-              value="cc"
-              onClick={clickHandler2}
-            >
-              Send BCC
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              id="btn3"
-              value="bcc"
-              onClick={clickHandler3}
-            >
-              Send CC
             </button>
           </div>
         </form>

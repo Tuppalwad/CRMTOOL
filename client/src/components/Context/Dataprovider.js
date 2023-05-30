@@ -14,6 +14,10 @@ function Dataprovider({ children }) {
   const [list, setlist] = React.useState([]);
   const [listofsendmail, setlistofsendmail] = React.useState([]);
   const [listofmails, setlistofmails] = React.useState([]);
+  const [userImage, setUserImage] = React.useState(null);
+  const [resultmails, setresultmails] = React.useState([]);
+  const [attendencemails, setattendencemails] = React.useState([]);
+  const [getspammails, setgetspammails] = React.useState([]);
   useEffect(() => {
     account
       .get()
@@ -43,7 +47,6 @@ function Dataprovider({ children }) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-
             "Allow-Control-Allow-Origin": "*",
           },
 
@@ -68,8 +71,11 @@ function Dataprovider({ children }) {
         })
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
-            setlist(data.data);
+            if (data.data === undefined) {
+              setlist([]);
+            } else {
+              setlist(data.data);
+            }
           });
         fetch("http://localhost:5000/sendBirthdayMail", {
           method: "GET",
@@ -95,31 +101,92 @@ function Dataprovider({ children }) {
           .then((res) => {
             setlistofmails(res.email);
           });
+        fetch("http://localhost:5000/getImages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ email: emailforgetdata }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res);
+            if (res.images === null) {
+              setUserImage(null);
+            } else {
+              setUserImage(res.images);
+            }
+          });
+
+        fetch("http://localhost:5000/getresultemails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ email: emailforgetdata }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.status === "Success") {
+              setresultmails(res.email);
+            }
+          });
+
+        fetch("http://localhost:5000/getattendencemails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ email: emailforgetdata }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.status === "Success") {
+              setattendencemails(res.email);
+            }
+          });
+        fetch("http://localhost:5000/getspamemails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ email: emailforgetdata }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.status === "Success") {
+              setgetspammails(res.email);
+            }
+          });
       })
       .catch((error) => {
         console.log(error);
       });
   }, []);
-  console.log(listofmails);
+  console.log(userImage);
   return (
     <>
       <Context.Provider
         value={{
+          userImage,
           islogin,
-          setislogin,
           email,
           name,
           photo,
           phone,
           contactlist,
-          setcontactlist,
           smtp,
-          setsmtp,
           list,
-          setlist,
           listofsendmail,
-          setlistofsendmail,
           listofmails,
+          contactlistdate,
+          resultmails,
+          attendencemails,
+          getspammails,
         }}
       >
         {children}

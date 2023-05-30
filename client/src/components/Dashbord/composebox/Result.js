@@ -48,6 +48,7 @@ function ComposeBox() {
       condition: selectedOption === "" ? customOption : selectedOption,
       type: type,
       email: email,
+      spam: "false",
     };
 
     fetch("http://localhost:5000/checkSpam", {
@@ -98,6 +99,7 @@ function ComposeBox() {
           }).then((confirmed) => {
             console.log(confirmed);
             if (confirmed) {
+              data.spam = "true";
               try {
                 fetch("http://localhost:5000/composemail", {
                   method: "POST",
@@ -105,7 +107,7 @@ function ComposeBox() {
                     "Content-Type": "application/json",
                     "Access-Control-Allow-Origin": "*",
                   },
-                  body: JSON.stringify({ data: data, spam: "true" }),
+                  body: JSON.stringify(data),
                 })
                   .then((res) => res.json())
                   .then((res) => {
@@ -157,7 +159,7 @@ function ComposeBox() {
           <div className="space-y-12">
             <div className="border-b border-gray-900/10 pb-12">
               <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="  sm:col-span-4">
+                {/* <div className="  sm:col-span-4">
                   <label
                     htmlFor="username"
                     className="block text-sm font-medium leading-6 text-gray-900"
@@ -177,7 +179,7 @@ function ComposeBox() {
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="sm:col-span-4">
                   <label
