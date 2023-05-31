@@ -1592,7 +1592,7 @@ def updateprofile():
 
 if __name__ == "__main__":
     # ref.child("users").child("omkar").child("contactList").child("Friends").delete()
-    # ref.child("users").child("omkar").child("contactList").child(
+    ref.child("users").child("abc").delete()
     #     "BirthdayList"
     # ).delete()
     # sendBirthdayMail()
