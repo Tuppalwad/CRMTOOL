@@ -7,13 +7,10 @@ from datetime import datetime, timedelta
 import jwt
 from SpamDetation import check_spam
 import smtplib
-import time
-import threading
+# import time
+# import threading
 from flask import Flask, request, send_file
-from werkzeug.utils import secure_filename
-import os
 
-# from inbox import getMails
 import firebase_admin
 from firebase_admin import credentials, db
 
@@ -46,33 +43,6 @@ UPLOAD_FOLDER = "uploads"  # Folder to store uploaded images
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-@app.route("/feedback", methods=["POST"])
-def feedback():
-    if request.method == "POST":
-        try:
-            data = request.get_json()
-            email = data["email"].split("@")[0]
-            message = data["message"]
-            rating = data["rating"]
-            feedback = data["feedback"]
-            id = ref.child("spamMails").child(email).get()
-            if id == None:
-                id = 0
-            else:
-                id = len(id)
-            ref.child("spamMails").child(email).child(str(id)).set(
-                {
-                    "message": message,
-                    "rating": rating,
-                    "feedback": feedback,
-                }
-            )
-            return jsonify({"message": "Success"})
-        except Exception as e:
-            print(e)
-            return jsonify({"message": "faild"})
-    else:
-        return
 
 
 @app.route("/register", methods=["POST"])
@@ -155,6 +125,33 @@ def login():
                 }
             )
 
+@app.route("/feedback", methods=["POST"])
+def feedback():
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            email = data["email"].split("@")[0]
+            message = data["message"]
+            rating = data["rating"]
+            feedback = data["feedback"]
+            id = ref.child("spamMails").child(email).get()
+            if id == None:
+                id = 0
+            else:
+                id = len(id)
+            ref.child("spamMails").child(email).child(str(id)).set(
+                {
+                    "message": message,
+                    "rating": rating,
+                    "feedback": feedback,
+                }
+            )
+            return jsonify({"message": "Success"})
+        except Exception as e:
+            print(e)
+            return jsonify({"message": "faild"})
+    else:
+        return
 
 @app.route("/smtpConfig", methods=["POST"])
 def smtpConfig():
@@ -1592,9 +1589,10 @@ def updateprofile():
 
 if __name__ == "__main__":
     # ref.child("users").child("omkar").child("contactList").child("Friends").delete()
-    ref.child("users").child("abc").delete()
+    # ref.child("users").child("abc").delete()
     #     "BirthdayList"
     # ).delete()
+    # ref.child("users").delete()
     # sendBirthdayMail()
 
     app.run(debug=True)

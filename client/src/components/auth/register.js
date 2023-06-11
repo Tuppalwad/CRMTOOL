@@ -72,13 +72,11 @@ export default function SignUp() {
         .then(
           (response) => {
             console.log(response);
-            swal(
-              "Success",
-              "Account created successfully & verification mail sent",
-              "Success"
-            ).then(() => {
-              window.location.href = "/login";
-            });
+            swal("Success", "Account created successfully ", "Success").then(
+              () => {
+                window.location.href = "/login";
+              }
+            );
           },
           (error) => {
             console.log(error);

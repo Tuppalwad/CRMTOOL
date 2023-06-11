@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "react-router-dom";
 function Fooder() {
   return (
     <div>
@@ -16,53 +16,6 @@ function Fooder() {
               <span className="text-2xl text-white">CRM</span>
               <span className="text-2xl text-white">Tool</span>
             </div>
-
-            {/* <div className="grid grid-cols-2 justify-center items-start w-1/3 mx-auto gap-8 sm:gap-6 sm:grid-cols-3">
-              <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
-                  Unsubscribe link
-                </h2>
-                <ul className="text-gray-600 dark:text-gray-400 font-medium">
-                  <li>
-                    <a href="#" className="hover:underline">
-                      Unsubscribe
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
-                  Support
-                </h2>
-                <ul className="text-gray-600 dark:text-gray-400 font-medium">
-                  <li className="mb-4">
-                    <a
-                      href="https://github.com/themesberg/flowbite"
-                      className="hover:underline "
-                    >
-                      Contact
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
-                  Legal
-                </h2>
-                <ul className="text-gray-600 dark:text-gray-400 font-medium">
-                  <li className="mb-4">
-                    <a href="#" className="hover:underline">
-                      Privacy Policy
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="hover:underline">
-                      Terms &amp; Conditions
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div> */}
           </div>
           <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
           <div className="sm:flex sm:items-center sm:justify-between">
@@ -74,8 +27,8 @@ function Fooder() {
               . All Rights Reserved.
             </span>
             <div className="flex mt-4 space-x-6 sm:justify-center sm:mt-0">
-              <a
-                href="#"
+              <Link
+                to="/"
                 className="text-gray-500 hover:text-gray-900 dark:hover:text-white"
               >
                 <svg
@@ -91,7 +44,7 @@ function Fooder() {
                   />
                 </svg>
                 <span className="sr-only">Facebook page</span>
-              </a>
+              </Link>
               <a
                 href="#"
                 className="text-gray-500 hover:text-gray-900 dark:hover:text-white"

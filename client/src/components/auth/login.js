@@ -18,8 +18,7 @@ import swal from "sweetalert";
 import SocialLogin from "./SocialLogin";
 import account from "../Appwrite/appwriteConfig";
 import Navbar from "../Homepages/Navbar";
-// import Context from "../Context/Createcontext";
-// import { useContext } from "react";
+
 function Copyright(props) {
   return (
     <Typography

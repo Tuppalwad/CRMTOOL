@@ -59,8 +59,6 @@ function Navbar() {
           ))}
         </ul>
 
-        {/* how to do phone mode dislply none and desktop mode display block in tailwind css for login and signup button */}
-
         <div className="flex  md:ml-auto md:mr-0 mr-auto md:mt-0 mt-8  ">
           <button className=" mr-6  py-1 lg:flex inPhonemode " name="Login">
             {" "}
@@ -71,13 +69,6 @@ function Navbar() {
           <button class="bg-transparent inPhonemode hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-4 border border-blue-500 hover:border-transparent rounded">
             <Link to="/register">Sign Up</Link>
           </button>
-          {/* <button
-            className="bg-transparent hover:bg-blue-500 text-black font-semibold hover:text-black py-2 px-4 border border-blue-500 hover:border-transparent rounded"
-            style={{ marginTop: "-5px" }}
-          >
-            {" "}
-           
-          </button> */}
         </div>
       </div>
     </div>

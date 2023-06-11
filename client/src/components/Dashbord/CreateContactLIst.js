@@ -3,29 +3,19 @@ import DNavbar from "./DNavbar";
 import readXlsxFile from "read-excel-file";
 import swal from "sweetalert";
 import account from "../Appwrite/appwriteConfig";
-import { useNavigate } from "react-router-dom";
 function CreateContactLIst() {
   const [rows, setrows] = React.useState([]);
   const [email, setemail] = React.useState("");
   const [filename, setfilename] = React.useState("");
-  const [test, settest] = React.useState([]);
-  const navigate = useNavigate();
+
   const readExcel = (e) => {
     e.preventDefault();
     const file = e.target.files[0];
-    const testd = e.target.files[1];
     readXlsxFile(file).then((rows) => {
       setrows(rows);
     });
-
-    readXlsxFile(testd).then((s) => {
-      settest(s);
-    });
   };
 
-  console.log("testeste");
-  console.log(rows);
-  console.log(test);
   useEffect(() => {
     account
       .get()

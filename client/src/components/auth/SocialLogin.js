@@ -22,10 +22,6 @@ export default function SocialLogin() {
   return (
     <>
       <div className="flex w-full">
-        {/* <button
-          onClick={(e) => GoogleLogin(e)}
-          className="bg-blue-500  flex w-full  hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded"
-        ></button> */}
         <button
           className="my-3 bg-transparent w-full hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
           onClick={(e) => GoogleLogin(e)}
